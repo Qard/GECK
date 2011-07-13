@@ -21,9 +21,6 @@ var defaults = {
   all: function(err, doc, req, res, cb) { cb(err, doc, req, res); },
   validate: function() { return true; }
 };
-var events = {
-  
-};
 
 // Prepare exports.
 var geck = {
