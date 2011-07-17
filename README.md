@@ -1,6 +1,22 @@
 # GECK
 Geck makes resourceful API-driven apps dead-easy. It's intended for use backing single-page web applications powered by frontend Javascript frameworks like [Backbone.js](http://documentcloud.github.com/backbone).
 
+## Requirements
+* Node.js 0.4+
+* Cradle + CouchDB
+* Underscore
+* Express
+* Jade
+
+## Route Map
+When a resource is defined, several routes are created. The following method and path combos map to the named definition functions;
+
+    POST    /resource     create
+    GET     /resource/id  read
+    PUT     /resource/id  update
+    DELETE  /resource/id  destroy
+    GET     /resource     list
+
 ## API
 ### resource(name [, definition])
 This is where the magic happens. All you need is to supply a database name. GECK will automagically find a table by the same name, creating a new one if necessary, and setup full CRUD route access to it! Using the definition you can add some extra functionality like validation or partial rendering.
@@ -14,7 +30,7 @@ This is where the magic happens. All you need is to supply a database name. GECK
 #### definition.validate(data)
 Every app needs to validate the data sent to it before saving it. With the validation method you can define some validations that need to pass before GECK saves the data to the database.
 
-#### definition.list/read/create/update/destroy(req, res)
+#### definition.create/read/update/destroy/list(req, res)
 All the CRUD routes that GECK defines can also be overwritten. The defaults look just like this;
 
     this.read = function(req, res){
@@ -34,6 +50,9 @@ These provides a simple method of returning JSON or HTML data to the client.
 ##### res.tmpl
 This allows for simple rendering of jade templates to return to the client.
 
+#### definition.base = (string)
+This is used to specify the base directory to attach all routes to. For example; one might use '/api' to expose all GECK-backed routes under that directory rather than root. Default: ''
+
 #### definition.destructive = (bool)
 If destructive is enabled, updates will replace the entire current doc with the supplied data. When disabled, the supplied data will simply be merged over the existing data. Default: true
 
@@ -50,7 +69,7 @@ Prepares the CouchDB connection and passes the config, if present, to cradle.set
 This accepts the same format of definition object as resource(). But this will apply the supplied definition to the defaults used for all future calls to resource().
 
 ### listen(port | app)
-You can either specify a port number for you GECK instance to listen to, or you can attach it to an existing express server.
+You can either specify a port number for the GECK instance to listen to, or you can attach it to an existing express server.
 
 ---
 

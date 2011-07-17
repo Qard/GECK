@@ -40,9 +40,16 @@ var basic = function(req, res) {
 
 // Define resource definition defaults.
 var defaults = {
-  destructive: true, allow_forced_ids: false, include_docs_in_list: true,
-  list: basic, read: basic, create: basic, update: basic, destroy: basic,
-  validate: function() { return true; }
+  base: ''
+  , list: basic
+  , read: basic
+  , create: basic
+  , update: basic
+  , destroy: basic
+  , destructive: true
+  , allow_forced_ids: false
+  , include_docs_in_list: true
+  , validate: function() { return true; }
 };
 
 // Prepare exports.
@@ -67,7 +74,7 @@ var geck = {
     if (typeof this.routes[method] === 'undefined') {
       this.routes[method] = {};
     }
-    this.routes[method][path] = callback;
+    this.routes[method][defaults.base+path] = callback;
     return this;
   }
 
@@ -106,7 +113,10 @@ var geck = {
     // Make sure the database is ready and associate with this resource.
     if ( ! this.cradle) { this.database(); }
     var db = this.cradle.database(name);
-    db.exists(function(err, exists) { if ( ! err && ! exists) { db.create(); } });
+    db.exists(function(err, exists) {
+      if (err) { throw new Error(err); }
+      else if ( ! exists) { db.create(); }
+    });
 
     // Merge defaults into definition.
     if (typeof def === 'function') { def = new def(); }
