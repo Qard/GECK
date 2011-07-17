@@ -8,8 +8,12 @@
     "url": "git://github.com/Qard/GECK.git"
   },
   "engines": {
-    "node": "~v0.4.9"
+    "node": ">=v0.4.0"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "express": "*",
+    "cradle": "*",
+    "underscore": "*",
+    "jade": "*"
+  }
 }
