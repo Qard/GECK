@@ -11,10 +11,10 @@ This is where the magic happens. All you need is to supply a database name. GECK
       };
     });
 
-##### definition.validate(data)
+#### definition.validate(data)
 Every app needs to validate the data sent to it before saving it. With the validation method you can define some validations that need to pass before GECK saves the data to the database.
 
-##### definition.list/read/create/update/destroy(req, res)
+#### definition.list/read/create/update/destroy(req, res)
 All the CRUD routes that GECK defines can also be overwritten. The defaults look just like this;
 
     this.read = function(req, res){
@@ -25,22 +25,22 @@ All the CRUD routes that GECK defines can also be overwritten. The defaults look
       });
     };
 
-###### req.geck
+##### req.geck
 This is the EventEmitter instance that GECK uses to notify the routes when the requested data has either been retrieved successfully, or something went wrong. It supplies just two events; 'error' and 'success'. The error event receives the error message or object, while the success event receives the raw document returned by the database.
 
-###### res.json/html
+##### res.json/html
 These provides a simple method of returning JSON or HTML data to the client.
 
-###### res.tmpl
+##### res.tmpl
 This allows for simple rendering of jade templates to return to the client.
 
-##### definition.destructive = (bool)
+#### definition.destructive = (bool)
 If destructive is enabled, updates will replace the entire current doc with the supplied data. When disabled, the supplied data will simply be merged over the existing data. Default: true
 
-##### definition.allow_forced_ids = (bool)
+#### definition.allow_forced_ids = (bool)
 Allows creation requests to be made to a URL like /resource/id to use a specific id, rather than letting the database decide the ID itself. Default: false
 
-##### definition.include_docs_in_list = (bool)
+#### definition.include_docs_in_list = (bool)
 When enabled, document content will be included when viewing /resource. This is enabled by default, but I would recommend disabling this for larger datasets or your queries could become very slow. Default: true
 
 ### database([config])
@@ -54,7 +54,7 @@ You can either specify a port number for you GECK instance to listen to, or you 
 
 ---
 
-##### Copyright (c) 2011 Stephen Belanger
+### Copyright (c) 2011 Stephen Belanger
 #### Licensed under MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
