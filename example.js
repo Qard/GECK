@@ -1,14 +1,14 @@
 // GECK is chainable, yay!
 require('./index')
 
+// Set some defaults.
+.defaults({ allow_forced_ids: true })
+
 // Define a users resource.
 // Resource definitions can be in function or object form.
-.resource('users', function() {
-  this.include_docs_in_list = false;
-  this.allow_forced_ids = true;
-
+.resource('users', function(){
   // Simple validation, just requires the key exists.
-  var required = ['email', 'webname', 'name', 'signup_url', 'signup_service', 'created'];
+  var required = ['email', 'webname', 'name'];
   this.validate = function(data) {
     for (var key in required) {
       if (typeof required[key] === 'undefined') { return false; }

@@ -1,5 +1,5 @@
 # GECK
-Geck makes resourceful API-driven apps _dead-easy_. It's intended for use backing single-page web applications powered by frontend Javascript frameworks like [Backbone.js](http://documentcloud.github.com/backbone).
+Geck makes resourceful API-driven apps dead-easy. It's intended for use backing single-page web applications powered by frontend Javascript frameworks like [Backbone.js](http://documentcloud.github.com/backbone).
 
 ## API
 ### resource(name [, definition])
@@ -44,7 +44,7 @@ Allows creation requests to be made to a URL like /resource/id to use a specific
 When enabled, document content will be included when viewing /resource. This is enabled by default, but I would recommend disabling this for larger datasets or your queries could become very slow. Default: true
 
 ### database([config])
-Prepares the CouchDB connection and passes the config, if present, to cradle.setup(). Calling this should never be necessary, as the first resource definition will call this if the connection is not yet available.
+Prepares the CouchDB connection and passes the config, if present, to cradle.setup(). Calling this should only be necessary if the database is not on localhost with the default settings, as the first resource definition will call this if the connection is not yet available.
 
 ### defaults(definition)
 This accepts the same format of definition object as resource(). But this will apply the supplied definition to the defaults used for all future calls to resource().
