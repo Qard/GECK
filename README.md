@@ -50,17 +50,15 @@ These provides a simple method of returning JSON or HTML data to the client.
 ##### res.tmpl
 This allows for simple rendering of jade templates to return to the client.
 
+#### definition.db = (object)
+This is used to define how data should be stored. The database types currently available are 'memory' and 'mongo'. Warning: 'memory' does not persist!
+Default: { type: 'memory', name:'geck' }
+
 #### definition.base = (string)
 This is used to specify the base directory to attach all routes to. For example; one might use '/api' to expose all GECK-backed routes under that directory rather than root. Default: ''
 
-#### definition.destructive = (bool)
-If destructive is enabled, updates will replace the entire current doc with the supplied data. When disabled, the supplied data will simply be merged over the existing data. Default: true
-
 #### definition.allow_forced_ids = (bool)
 Allows creation requests to be made to a URL like /resource/id to use a specific id, rather than letting the database decide the ID itself. Default: false
-
-#### definition.include_docs_in_list = (bool)
-When enabled, document content will be included when viewing /resource. This is enabled by default, but I would recommend disabling this for larger datasets or your queries could become very slow. Default: true
 
 ### database([config])
 Prepares the CouchDB connection and passes the config, if present, to cradle.setup(). Calling this should only be necessary if the database is not on localhost with the default settings, as the first resource definition will call this if the connection is not yet available.

@@ -2,7 +2,7 @@
   "author": "Stephen Belanger <admin@stephenbelanger.com> (http://stephenbelanger.com)",
   "name": "geck",
   "description": "Resourceful services made brain-dead easy.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/Qard/GECK.git"
@@ -12,8 +12,12 @@
   },
   "dependencies": {
     "express": "*",
-    "cradle": "*",
+    "jade": "*",
+
     "underscore": "*",
-    "jade": "*"
+    "node-uuid":"*",
+    "inflectjs":"*",
+    
+    "mongodb":"*"
   }
 }

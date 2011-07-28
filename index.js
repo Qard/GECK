@@ -21,11 +21,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * TODO:
+ * - Authorization (Basic? Key-based? Choice?)
+ * - Abstract storage manager so it can be accessed outside of geck.
+ * - Abstract storage drivers to other projects and add geck-memory-driver to deps.
+ * - Add update functionality to one-to-one and many-to-many relations.
+ * - Make some way for relation responses to use handlers from child not parent.
  */
 // Load dependencies
 var Event = require('events').EventEmitter;
+var Resource = require('./lib/resource');
+var Store = require('./lib/store');
+var Inflect = require('inflectjs');
 var express = require('express');
-var cradle = require('cradle');
 var jade = require('jade');
 var _ = require('underscore');
 
@@ -41,21 +50,27 @@ var basic = function(req, res) {
 // Define resource definition defaults.
 var defaults = {
   base: ''
+  , db: {
+    type: 'memory'
+    , name: 'geck'
+  }
   , list: basic
   , read: basic
   , create: basic
   , update: basic
   , destroy: basic
-  , destructive: true
+  , relations: {}
   , allow_forced_ids: false
-  , include_docs_in_list: true
   , validate: function() { return true; }
+  , after_create: function(){}
+  , after_update: function(){}
 };
 
 // Prepare exports.
 var geck = {
   // Set some globally accessible variables.
-  routes: {}, cradle: null
+  routes: {}
+  , loggers: []
 
   /**
    * Create method to manually add routes.
@@ -78,17 +93,8 @@ var geck = {
     return this;
   }
 
-  /**
-   * Prepare database.
-   * 
-   * @param object
-   *    Configuration object to pass to cradle.setup()
-   */
-  , database: function(conf) {
-    if (conf) { cradle.setup(conf); }
-    this.cradle = new cradle.Connection;
-    return this;
-  }
+  // Attach a logger.
+  , logger: function(cb) { this.loggers.push(cb); }
 
   // Yo dawg, I heard you like defaults,
   // so I made you some defaults for yo defaults
@@ -98,6 +104,19 @@ var geck = {
     else if (typeof def === 'undefined') { def = {}; }
     defaults = _.defaults(def, defaults);
     return this;
+  }
+
+  // Access a database using GECK's built-in storage manager.
+  // Pass callback through ready(), if available.
+  , database: function(name, cb){
+    var db = new Store(defaults.db.type, {
+      database: Inflect.plural(defaults.db.name)
+      , collection: Inflect.plural(name)
+    });
+    if (typeof cb === 'function') {
+      db.ready(function(){ cb(db); });
+    }
+    return db;
   }
 
   /**
@@ -110,135 +129,12 @@ var geck = {
    *    Definition to instantiate the resource manager with.
    */
   , resource: function(name, def) {
-    // Make sure the database is ready and associate with this resource.
-    if ( ! this.cradle) { this.database(); }
-    var db = this.cradle.database(name);
-    db.exists(function(err, exists) {
-      if (err) { throw new Error(err); }
-      else if ( ! exists) { db.create(); }
-    });
-
-    // Merge defaults into definition.
+    // Support function-style or blank definitions.
     if (typeof def === 'function') { def = new def(); }
     else if (typeof def === 'undefined') { def = {}; }
-    def = _.defaults(def, defaults);
 
-    /*********
-     * Create
-     *********/
-    this.route('post', '/'+name+'/:id?', function(req, res) {
-      // Just run the handler right away and let it wait.
-      def.create(req, res);
-
-      // Store the creation process for later.
-      var create = function() {
-        // Run Validations.
-        if ( ! def.validate(req.body)) {
-          req.geck.emit('error', 'Validation failure.');
-        
-        // Validation succeeded. Attempt the creation.
-        } else {
-          // Prepare args array.
-          var args = [req.body, function(err, doc) {
-            req.geck.emit(err ? 'error' : 'success', err ? err : doc);
-          }];
-          
-          // Prepend id, if available.
-          if (def.allow_forced_ids && req.params.id) {
-            args.unshift(req.params.id);
-          }
-
-          // Make our dynamically structured database call.
-          db.save.apply(db, args);
-        }
-      };
-
-      // Check non-existence, if id supplied.
-      if (def.allow_forced_ids && req.params.id) {
-        db.get(req.params.id, function(err, doc) {
-          if (err) {
-            req.geck.emit('error', 'That id is in use.');
-          } else {
-            create();
-          }
-        });
-      
-      // Otherwise, just jump into our creator.
-      } else {
-        create();
-      }
-    });
-
-    /*********
-     * Read
-     *********/
-    this.route('get', '/'+name+'/:id', function(req, res) {
-      def.read(req, res);
-
-      // Attempt to fetch the item.
-      db.get(req.params.id, function(err, doc) {
-        req.geck.emit(err ? 'error' : 'success', err ? err : doc);
-      });
-    });
-
-    /*********
-     * Update
-     *********/
-    this.route('put', '/'+name+'/:id', function(req, res) {
-      def.update(req, res);
-
-      // Check if destructive saves are enabled.
-      var mode = def.destructive ? 'save' : 'merge';
-
-      // Remove _id/_rev, if allow_forced_ids is not enabled.
-      if ( ! def.allow_forced_ids) {
-        delete req.body._id;
-        delete req.body._rev;
-      }
-
-      // Run validations.
-      if ( ! def.validate(req.body)) {
-        req.geck.emit('error', 'Validation failure.');
-
-      // Validation succeeded. Attempt the update.
-      } else {
-        db[mode](req.params.id, req.body, function(err, doc) {
-          req.emit(err ? 'error' : 'success', err ? err : doc);
-        });
-      }
-    });
-
-    /*********
-     * Delete
-     *********/
-    this.route('del', '/'+name+'/:id', function(req, res) {
-      def.destroy(req, res);
-
-      // We need to fetch first, so we can get the _rev.
-      db.get(req.params.id, function(err, doc){
-        if (err) {
-          req.geck.emit('error', err);
-        
-        // No errors, attempt destruction.
-        } else {
-          db.remove(req.params.id, doc._rev, function(err, doc) {
-            req.geck.emit(err ? 'error' : 'success', err ? err : doc);
-          });
-        }
-      });
-    });
-
-    /*********
-     * List
-     *********/
-    this.route('get', '/'+name, function(req, res) {
-      def.list(req, res);
-
-      // Fetch list of all documents.
-      db.all({ include_docs: def.include_docs_in_list }, function(err, doc) {
-        req.geck.emit(err ? 'error' : 'success', err ? err : doc);
-      });
-    });
+    // Build resource, merging supplied definition over defaults.
+    (new Resource(Inflect.singular(name), _.defaults(def, defaults))).build(this);
 
     // Return for chaining.
     return this;
@@ -284,6 +180,14 @@ var geck = {
       next();
     });
 
+    // Attach loggers.
+    _.each(this.loggers, function(logger) {
+      app.use(function(req, res, next){
+        logger(req);
+        next();
+      })
+    });
+
     // Apply callbacks to app.
     for (var method in this.routes) {
       var callbacks = this.routes[method];
@@ -295,6 +199,8 @@ var geck = {
 
     // Listen, if we have a port number.
     if (typeof port === 'number') { app.listen(port); }
+
+    return app;
   }
 };
 
