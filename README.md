@@ -3,7 +3,7 @@ Geck makes resourceful API-driven apps dead-easy. It's intended for use backing 
 
 ## Requirements
 * Node.js 0.4+
-* Cradle + CouchDB
+* MongoDB
 * Underscore
 * Express
 * Jade
