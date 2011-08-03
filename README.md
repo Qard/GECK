@@ -60,6 +60,15 @@ This is used to specify the base directory to attach all routes to. For example;
 #### definition.allow_forced_ids = (bool)
 Allows creation requests to be made to a URL like /resource/id to use a specific id, rather than letting the database decide the ID itself. Default: false
 
+#### definition.one = (array)
+A list of resources to have a one-to-one relation to.
+
+#### definition.many = (array)
+A list of resources to have a one-to-many relation to.
+
+#### definition.many_to_many = (object)
+A list of resources to have a many-to-many relation to. Key is relation resource name, value is pivot resource name.
+
 ### database([config])
 Prepares the CouchDB connection and passes the config, if present, to cradle.setup(). Calling this should only be necessary if the database is not on localhost with the default settings, as the first resource definition will call this if the connection is not yet available.
 
