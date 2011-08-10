@@ -109,10 +109,9 @@ var geck = {
   // Access a database using GECK's built-in storage manager.
   // Pass callback through ready(), if available.
   , database: function(name, cb){
-    var db = new Store(defaults.db.type, {
-      database: Inflect.plural(defaults.db.name)
-      , collection: Inflect.plural(name)
-    });
+    var db = new Store(defaults.db.type, _.defaults({
+      collection: Inflect.plural(name)
+    }, defaults.db));
     if (typeof cb === 'function') {
       db.ready(function(){ cb(db); });
     }
@@ -134,7 +133,8 @@ var geck = {
     else if (typeof def === 'undefined') { def = {}; }
 
     // Build resource, merging supplied definition over defaults.
-    (new Resource(Inflect.singular(name), _.defaults(def, defaults))).build(this);
+    var res = new Resource(Inflect.singular(name), _.defaults(def, defaults), this);
+    res.build();
 
     // Return for chaining.
     return this;
