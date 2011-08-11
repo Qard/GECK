@@ -17,6 +17,7 @@
     "underscore": "*",
     "node-uuid":"*",
     "inflectjs":"*",
+    "chainer":"*",
     
     "mongodb":"*"
   }

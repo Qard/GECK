@@ -102,6 +102,7 @@ var geck = {
   , defaults: function(def) {
     if (typeof def === 'function') { def = new def(); }
     else if (typeof def === 'undefined') { def = {}; }
+    def.db = _.defaults(def.db||{}, defaults.db);
     defaults = _.defaults(def, defaults);
     return this;
   }
@@ -110,12 +111,11 @@ var geck = {
   // Pass callback through ready(), if available.
   , database: function(name, cb){
     var db = new Store(defaults.db.type, _.defaults({
-      collection: Inflect.plural(name)
+      database: defaults.db.database || defaults.db.name,
+      collection: Inflect.singular(name)
     }, defaults.db));
-    if (typeof cb === 'function') {
-      db.ready(function(){ cb(db); });
-    }
-    return db;
+    if (typeof cb !== 'function') { return db; }
+    db.ready(function(){ cb(db); });
   }
 
   /**
@@ -131,6 +131,7 @@ var geck = {
     // Support function-style or blank definitions.
     if (typeof def === 'function') { def = new def(); }
     else if (typeof def === 'undefined') { def = {}; }
+    def.db = _.defaults(def.db||{}, defaults.db);
 
     // Build resource, merging supplied definition over defaults.
     var res = new Resource(Inflect.singular(name), _.defaults(def, defaults), this);
