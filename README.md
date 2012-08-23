@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Qard/GECK.png)](http://travis-ci.org/Qard/GECK)
 # GECK
 Geck makes resourceful API-driven apps dead-easy. It's intended for use backing single-page web applications powered by frontend Javascript frameworks like [Backbone.js](http://documentcloud.github.com/backbone).
 
