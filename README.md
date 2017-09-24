@@ -1,5 +1,7 @@
 [![build status](https://secure.travis-ci.org/Qard/GECK.png)](http://travis-ci.org/Qard/GECK)
 # GECK
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/Qard/GECK.svg)](https://greenkeeper.io/)
 Geck makes resourceful API-driven apps dead-easy. It's intended for use backing single-page web applications powered by frontend Javascript frameworks like [Backbone.js](http://documentcloud.github.com/backbone).
 
 ## Requirements
